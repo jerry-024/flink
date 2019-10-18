@@ -23,6 +23,8 @@ import { deepFind } from 'utils';
 import { JobSubTaskInterface } from 'interfaces';
 import { JobService } from 'services';
 
+export type JobSubTaskInterfaceWithView = JobSubTaskInterface & { rowspan?: number };
+
 @Component({
   selector: 'flink-job-overview-drawer-subtasks',
   templateUrl: './job-overview-drawer-subtasks.component.html',
@@ -30,7 +32,7 @@ import { JobService } from 'services';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class JobOverviewDrawerSubtasksComponent implements OnInit, OnDestroy {
-  listOfTask: JobSubTaskInterface[] = [];
+  listOfTasks: JobSubTaskInterfaceWithView[] = [];
   destroy$ = new Subject();
   sortName: string;
   sortValue: string;
@@ -48,8 +50,8 @@ export class JobOverviewDrawerSubtasksComponent implements OnInit, OnDestroy {
 
   search() {
     if (this.sortName) {
-      this.listOfTask = [
-        ...this.listOfTask.sort((pre, next) => {
+      this.listOfTasks = [
+        ...this.listOfTasks.sort((pre, next) => {
           if (this.sortValue === 'ascend') {
             return deepFind(pre, this.sortName) > deepFind(next, this.sortName) ? 1 : -1;
           } else {
@@ -70,7 +72,20 @@ export class JobOverviewDrawerSubtasksComponent implements OnInit, OnDestroy {
       )
       .subscribe(
         data => {
-          this.listOfTask = data;
+          const id2tasks: { [tmid: string]: JobSubTaskInterface[] } = {};
+          data.forEach(task => {
+            if(id2tasks[task["taskmanager-id"]]){
+              id2tasks[task["taskmanager-id"]].push(task)
+            } else {
+              id2tasks[task["taskmanager-id"]] = [task]
+            }
+          });
+          this.listOfTasks = Object.values(id2tasks).map(tasks => {
+            (tasks[0] as JobSubTaskInterfaceWithView).rowspan = tasks.length;
+            return [...tasks]
+          }).reduce((a, b) => [...b, ...a], []);
+
+          console.log(this.listOfTasks);
           this.isLoading = false;
           this.search();
           this.cdr.markForCheck();

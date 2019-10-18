@@ -20,14 +20,14 @@
   class="no-border small full-height"
   [nzSize]="'small'"
   [nzLoading]="isLoading"
-  [nzData]="listOfTask"
-  [nzScroll]="{x:'1440px',y:'calc( 100% - 35px )'}"
+  [nzData]="listOfTasks"
+  [nzScroll]="{x:'1545px',y:'calc( 100% - 35px )'}"
   [nzFrontPagination]="false"
   [nzShowPagination]="false">
   <thead (nzSortChange)="sort($event)" nzSingleSort>
     <tr>
       <th nzWidth="40px" nzLeft="0px">ID</th>
-      <th nzWidth="50px" nzLeft="40px">Logs</th>
+      <th nzWidth="120px" nzLeft="40px">TaskManager Logs</th>
       <th nzSortKey="metrics.read-bytes" nzShowSort nzWidth="140px">Bytes Received</th>
       <th nzSortKey="metrics.read-records" nzShowSort nzWidth="150px">Records Received</th>
       <th nzSortKey="metrics.write-bytes" nzShowSort nzWidth="120px">Bytes Sent</th>
@@ -41,14 +41,14 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let task of listOfTask; trackBy:trackTaskBy;">
+    <tr *ngFor="let task of listOfTasks; trackBy:trackTaskBy; let i = index; let len = length">
       <td nzLeft="0">
         {{ task.subtask }}
       </td>
-      <td nzLeft="40px">
+      <td nzLeft="40px" *ngIf="task.rowspan" [attr.rowspan]="task.rowspan">
         <span *ngIf="!task['taskmanager-id'] || task['taskmanager-id'] === '(unassigned)'; else hrefTpl">-</span>
         <ng-template #hrefTpl>
-          <a [routerLink]="['/task-manager',task['taskmanager-id'],'logs']" target="_blank">log</a>
+          <a [routerLink]="['/task-manager',task['taskmanager-id'],'logs']" target="_blank">Taskmanager Log</a>
         </ng-template>
       </td>
       <td>
