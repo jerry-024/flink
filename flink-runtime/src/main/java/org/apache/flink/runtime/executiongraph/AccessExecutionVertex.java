@@ -15,10 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.flink.runtime.executiongraph;
 
 import org.apache.flink.runtime.execution.ExecutionState;
 import org.apache.flink.runtime.taskmanager.TaskManagerLocation;
+import org.apache.flink.runtime.util.EvictingBoundedList;
 
 import javax.annotation.Nullable;
 
@@ -85,4 +87,11 @@ public interface AccessExecutionVertex {
 	 */
 	@Nullable
 	AccessExecution getPriorExecutionAttempt(int attemptNumber);
+
+	/**
+	 * Returns the prior executions.
+	 *
+	 * @return prior executions.
+	 */
+	EvictingBoundedList<ArchivedExecution> getPriorExecutionAttempts();
 }
