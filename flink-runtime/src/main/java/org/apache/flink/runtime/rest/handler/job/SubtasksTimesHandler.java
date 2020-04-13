@@ -18,8 +18,10 @@
 
 package org.apache.flink.runtime.rest.handler.job;
 
+import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.runtime.execution.ExecutionState;
+import org.apache.flink.runtime.executiongraph.AccessExecution;
 import org.apache.flink.runtime.executiongraph.AccessExecutionGraph;
 import org.apache.flink.runtime.executiongraph.AccessExecutionJobVertex;
 import org.apache.flink.runtime.executiongraph.AccessExecutionVertex;
@@ -28,10 +30,11 @@ import org.apache.flink.runtime.rest.handler.legacy.ExecutionGraphCache;
 import org.apache.flink.runtime.rest.messages.EmptyRequestBody;
 import org.apache.flink.runtime.rest.messages.JobIDPathParameter;
 import org.apache.flink.runtime.rest.messages.JobVertexIdPathParameter;
-import org.apache.flink.runtime.rest.messages.JobVertexMessageParameters;
 import org.apache.flink.runtime.rest.messages.MessageHeaders;
 import org.apache.flink.runtime.rest.messages.ResponseBody;
 import org.apache.flink.runtime.rest.messages.SubtasksTimesInfo;
+import org.apache.flink.runtime.rest.messages.SubtasksTimesMessageParameters;
+import org.apache.flink.runtime.rest.messages.SubtasksTimesShowHistoryQueryParameter;
 import org.apache.flink.runtime.taskmanager.TaskManagerLocation;
 import org.apache.flink.runtime.webmonitor.RestfulGateway;
 import org.apache.flink.runtime.webmonitor.history.ArchivedJson;
@@ -49,12 +52,15 @@ import java.util.concurrent.Executor;
 /**
  * Request handler for the subtasks times info.
  */
-public class SubtasksTimesHandler extends AbstractJobVertexHandler<SubtasksTimesInfo, JobVertexMessageParameters> implements JsonArchivist {
+public class SubtasksTimesHandler extends AbstractJobVertexHandler<SubtasksTimesInfo, SubtasksTimesMessageParameters> implements JsonArchivist {
+
+	static final boolean SHOW_HISTORY = false;
+
 	public SubtasksTimesHandler(
 			GatewayRetriever<? extends RestfulGateway> leaderRetriever,
 			Time timeout,
 			Map<String, String> responseHeaders,
-			MessageHeaders<EmptyRequestBody, SubtasksTimesInfo, JobVertexMessageParameters> messageHeaders,
+			MessageHeaders<EmptyRequestBody, SubtasksTimesInfo, SubtasksTimesMessageParameters> messageHeaders,
 			ExecutionGraphCache executionGraphCache,
 			Executor executor) {
 		super(
@@ -67,8 +73,16 @@ public class SubtasksTimesHandler extends AbstractJobVertexHandler<SubtasksTimes
 	}
 
 	@Override
-	protected SubtasksTimesInfo handleRequest(HandlerRequest<EmptyRequestBody, JobVertexMessageParameters> request, AccessExecutionJobVertex jobVertex) {
-		return createSubtaskTimesInfo(jobVertex);
+	protected SubtasksTimesInfo handleRequest(HandlerRequest<EmptyRequestBody, SubtasksTimesMessageParameters> request, AccessExecutionJobVertex jobVertex) {
+		List<Boolean> queryParams = request.getQueryParameter(SubtasksTimesShowHistoryQueryParameter.class);
+
+		final boolean showHistoryValue;
+		if (!queryParams.isEmpty()) {
+			showHistoryValue = queryParams.get(0);
+		} else {
+			showHistoryValue = SHOW_HISTORY;
+		}
+		return createSubtaskTimesInfo(jobVertex, showHistoryValue);
 	}
 
 	@Override
@@ -76,7 +90,7 @@ public class SubtasksTimesHandler extends AbstractJobVertexHandler<SubtasksTimes
 		Collection<? extends AccessExecutionJobVertex> allVertices = graph.getAllVertices().values();
 		List<ArchivedJson> archive = new ArrayList<>(allVertices.size());
 		for (AccessExecutionJobVertex task : allVertices) {
-			ResponseBody json = createSubtaskTimesInfo(task);
+			ResponseBody json = createSubtaskTimesInfo(task, SHOW_HISTORY);
 			String path = getMessageHeaders().getTargetRestEndpointURL()
 				.replace(':' + JobIDPathParameter.KEY, graph.getJobID().toString())
 				.replace(':' + JobVertexIdPathParameter.KEY, task.getJobVertexId().toString());
@@ -85,38 +99,43 @@ public class SubtasksTimesHandler extends AbstractJobVertexHandler<SubtasksTimes
 		return archive;
 	}
 
-	private static SubtasksTimesInfo createSubtaskTimesInfo(AccessExecutionJobVertex jobVertex) {
+	@VisibleForTesting
+	protected static SubtasksTimesInfo createSubtaskTimesInfo(AccessExecutionJobVertex jobVertex, boolean showHistory) {
 		final String id = jobVertex.getJobVertexId().toString();
 		final String name = jobVertex.getName();
 		final long now = System.currentTimeMillis();
 		final List<SubtasksTimesInfo.SubtaskTimeInfo> subtasks = new ArrayList<>();
 
-		int num = 0;
 		for (AccessExecutionVertex vertex : jobVertex.getTaskVertices()) {
-
-			long[] timestamps = vertex.getCurrentExecutionAttempt().getStateTimestamps();
-			ExecutionState status = vertex.getExecutionState();
-
-			long scheduledTime = timestamps[ExecutionState.SCHEDULED.ordinal()];
-
-			long start = scheduledTime > 0 ? scheduledTime : -1;
-			long end = status.isTerminal() ? timestamps[status.ordinal()] : now;
-			long duration = start >= 0 ? end - start : -1L;
-
-			TaskManagerLocation location = vertex.getCurrentAssignedResourceLocation();
-			String locationString = location == null ? "(unassigned)" : location.getHostname();
-
-			Map<ExecutionState, Long> timestampMap = new HashMap<>(ExecutionState.values().length);
-			for (ExecutionState state : ExecutionState.values()) {
-				timestampMap.put(state, timestamps[state.ordinal()]);
+			subtasks.add(createSubtaskTimeInfoFromAccessExecution(vertex.getCurrentExecutionAttempt(), now));
+			if (showHistory) {
+				vertex.getPriorExecutionAttempts().forEach(execution -> {
+					if (execution != null) {
+						subtasks.add(createSubtaskTimeInfoFromAccessExecution(execution, now));
+					}
+				});
 			}
-
-			subtasks.add(new SubtasksTimesInfo.SubtaskTimeInfo(
-				num++,
-				locationString,
-				duration,
-				timestampMap));
 		}
 		return new SubtasksTimesInfo(id, name, now, subtasks);
+	}
+
+	private static SubtasksTimesInfo.SubtaskTimeInfo createSubtaskTimeInfoFromAccessExecution(AccessExecution attempt, long now) {
+		long[] timestamps = attempt.getStateTimestamps();
+		ExecutionState status = attempt.getState();
+
+		long scheduledTime = timestamps[ExecutionState.SCHEDULED.ordinal()];
+
+		long start = scheduledTime > 0 ? scheduledTime : -1;
+		long end = status.isTerminal() ? timestamps[status.ordinal()] : now;
+		long duration = start >= 0 ? end - start : -1L;
+
+		TaskManagerLocation location = attempt.getAssignedResourceLocation();
+		String locationString = location == null ? "(unassigned)" : location.getHostname();
+
+		Map<ExecutionState, Long> timestampMap = new HashMap<>(ExecutionState.values().length);
+		for (ExecutionState state : ExecutionState.values()) {
+			timestampMap.put(state, timestamps[state.ordinal()]);
+		}
+		return new SubtasksTimesInfo.SubtaskTimeInfo(attempt.getParallelSubtaskIndex(), locationString, duration, timestampMap, attempt.getAttemptNumber());
 	}
 }

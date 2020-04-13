@@ -43,19 +43,19 @@ public class SubtasksTimesInfoTest extends RestResponseMarshallingTestBase<Subta
 		subTimeMap1.put(ExecutionState.RUNNING, 1L);
 		subTimeMap1.put(ExecutionState.FAILED, 2L);
 		subTimeMap1.put(ExecutionState.CANCELED, 3L);
-		subtasks.add(new SubtasksTimesInfo.SubtaskTimeInfo(0, "local1", 1L, subTimeMap1));
+		subtasks.add(new SubtasksTimesInfo.SubtaskTimeInfo(0, "local1", 1L, subTimeMap1, 0));
 
 		Map<ExecutionState, Long> subTimeMap2 = new HashMap<>();
 		subTimeMap2.put(ExecutionState.RUNNING, 4L);
 		subTimeMap2.put(ExecutionState.FAILED, 5L);
 		subTimeMap2.put(ExecutionState.CANCELED, 6L);
-		subtasks.add(new SubtasksTimesInfo.SubtaskTimeInfo(1, "local2", 2L, subTimeMap2));
+		subtasks.add(new SubtasksTimesInfo.SubtaskTimeInfo(1, "local2", 2L, subTimeMap2, 0));
 
 		Map<ExecutionState, Long> subTimeMap3 = new HashMap<>();
 		subTimeMap3.put(ExecutionState.SCHEDULED, 1L);
 		subTimeMap3.put(ExecutionState.FAILED, 2L);
 		subTimeMap3.put(ExecutionState.CANCELING, 3L);
-		subtasks.add(new SubtasksTimesInfo.SubtaskTimeInfo(2, "local3", 3L, subTimeMap3));
+		subtasks.add(new SubtasksTimesInfo.SubtaskTimeInfo(2, "local3", 3L, subTimeMap3, 0));
 
 		return new SubtasksTimesInfo("testId", "testName", System.currentTimeMillis(), subtasks);
 	}

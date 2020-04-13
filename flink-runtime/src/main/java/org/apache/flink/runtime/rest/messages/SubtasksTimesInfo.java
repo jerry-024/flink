@@ -77,13 +77,12 @@ public class SubtasksTimesInfo implements ResponseBody {
 		SubtasksTimesInfo that = (SubtasksTimesInfo) o;
 		return Objects.equals(id, that.id) &&
 			Objects.equals(name, that.name) &&
-			now == that.now &&
 			Objects.equals(subtasks, that.subtasks);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, name, now, subtasks);
+		return Objects.hash(id, name, subtasks);
 	}
 
 	//---------------------------------------------------------------------------------
@@ -99,6 +98,7 @@ public class SubtasksTimesInfo implements ResponseBody {
 		public static final String FIELD_NAME_HOST = "host";
 		public static final String FIELD_NAME_DURATION = "duration";
 		public static final String FIELD_NAME_TIMESTAMPS = "timestamps";
+		public static final String FIELD_NAME_ATTEMPT_NUM = "attempt-num";
 
 		@JsonProperty(FIELD_NAME_SUBTASK)
 		private final int subtask;
@@ -112,15 +112,20 @@ public class SubtasksTimesInfo implements ResponseBody {
 		@JsonProperty(FIELD_NAME_TIMESTAMPS)
 		private final Map<ExecutionState, Long> timestamps;
 
+		@JsonProperty(FIELD_NAME_ATTEMPT_NUM)
+		private final int attmptNum;
+
 		public SubtaskTimeInfo(
 				@JsonProperty(FIELD_NAME_SUBTASK) int subtask,
 				@JsonProperty(FIELD_NAME_HOST) String host,
 				@JsonProperty(FIELD_NAME_DURATION) long duration,
-				@JsonProperty(FIELD_NAME_TIMESTAMPS) Map<ExecutionState, Long> timestamps) {
+				@JsonProperty(FIELD_NAME_TIMESTAMPS) Map<ExecutionState, Long> timestamps,
+				@JsonProperty(FIELD_NAME_ATTEMPT_NUM) int attemptNum) {
 			this.subtask = subtask;
 			this.host = checkNotNull(host);
 			this.duration = duration;
 			this.timestamps = checkNotNull(timestamps);
+			this.attmptNum = attemptNum;
 		}
 
 		@Override
@@ -137,12 +142,13 @@ public class SubtasksTimesInfo implements ResponseBody {
 			return subtask == that.subtask &&
 				Objects.equals(host, that.host) &&
 				duration == that.duration &&
-				Objects.equals(timestamps, that.timestamps);
+				Objects.equals(timestamps, that.timestamps) &&
+				this.attmptNum == that.attmptNum;
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(subtask, host, duration, timestamps);
+			return Objects.hash(subtask, host, duration, timestamps, attmptNum);
 		}
 	}
 }
