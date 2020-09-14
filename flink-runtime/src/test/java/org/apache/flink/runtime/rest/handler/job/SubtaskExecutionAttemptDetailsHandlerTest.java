@@ -44,7 +44,7 @@ import org.apache.flink.runtime.rest.messages.job.SubtaskAttemptMessageParameter
 import org.apache.flink.runtime.rest.messages.job.SubtaskAttemptPathParameter;
 import org.apache.flink.runtime.rest.messages.job.SubtaskExecutionAttemptDetailsHeaders;
 import org.apache.flink.runtime.rest.messages.job.SubtaskExecutionAttemptDetailsInfo;
-import org.apache.flink.runtime.rest.messages.job.metrics.IOMetricsInfo;
+import org.apache.flink.runtime.rest.messages.job.metrics.SubTaskIOMetricsInfo;
 import org.apache.flink.runtime.testingUtils.TestingUtils;
 import org.apache.flink.runtime.util.EvictingBoundedList;
 import org.apache.flink.util.TestLogger;
@@ -78,12 +78,20 @@ public class SubtaskExecutionAttemptDetailsHandlerTest extends TestLogger {
 		final long bytesOut = 10L;
 		final long recordsIn = 20L;
 		final long recordsOut = 30L;
+		final float usageInputFloatingBuffers = 0.1f;
+		final float usageInputExclusiveBuffers = 0.1f;
+		final float usageOutPool = 0.2f;
+		final boolean isBackPressured = false;
 
 		final IOMetrics ioMetrics = new IOMetrics(
 			bytesIn,
 			bytesOut,
 			recordsIn,
-			recordsOut);
+			recordsOut,
+			usageInputFloatingBuffers,
+			usageInputExclusiveBuffers,
+			usageOutPool,
+			isBackPressured);
 
 		final ArchivedExecutionJobVertex archivedExecutionJobVertex = new ArchivedExecutionJobVertex(
 			new ArchivedExecutionVertex[]{
@@ -153,7 +161,7 @@ public class SubtaskExecutionAttemptDetailsHandlerTest extends TestLogger {
 			archivedExecutionJobVertex);
 
 		// Verify
-		final IOMetricsInfo ioMetricsInfo = new IOMetricsInfo(
+		final SubTaskIOMetricsInfo subTaskIOMetricsInfo = new SubTaskIOMetricsInfo(
 			bytesIn,
 			true,
 			bytesOut,
@@ -161,6 +169,8 @@ public class SubtaskExecutionAttemptDetailsHandlerTest extends TestLogger {
 			recordsIn,
 			true,
 			recordsOut,
+			true,
+			usageInputExclusiveBuffers, true, usageInputFloatingBuffers, true, usageOutPool, true, isBackPressured,
 			true
 		);
 
@@ -172,7 +182,7 @@ public class SubtaskExecutionAttemptDetailsHandlerTest extends TestLogger {
 			-1L,
 			0L,
 			-1L,
-			ioMetricsInfo,
+			subTaskIOMetricsInfo,
 			"(unassigned)"
 		);
 

@@ -20,7 +20,7 @@ package org.apache.flink.runtime.rest.messages.job;
 
 import org.apache.flink.runtime.execution.ExecutionState;
 import org.apache.flink.runtime.rest.messages.RestResponseMarshallingTestBase;
-import org.apache.flink.runtime.rest.messages.job.metrics.IOMetricsInfo;
+import org.apache.flink.runtime.rest.messages.job.metrics.SubTaskIOMetricsInfo;
 
 import java.util.Random;
 
@@ -38,7 +38,7 @@ public class SubtaskExecutionAttemptDetailsInfoTest extends RestResponseMarshall
 	protected SubtaskExecutionAttemptDetailsInfo getTestResponseInstance() throws Exception {
 		final Random random = new Random();
 
-		final IOMetricsInfo ioMetricsInfo = new IOMetricsInfo(
+		final SubTaskIOMetricsInfo subTaskIOMetricsInfo = new SubTaskIOMetricsInfo(
 			Math.abs(random.nextLong()),
 			random.nextBoolean(),
 			Math.abs(random.nextLong()),
@@ -46,6 +46,14 @@ public class SubtaskExecutionAttemptDetailsInfoTest extends RestResponseMarshall
 			Math.abs(random.nextLong()),
 			random.nextBoolean(),
 			Math.abs(random.nextLong()),
+			random.nextBoolean(),
+			Math.abs(random.nextFloat()),
+			random.nextBoolean(),
+			Math.abs(random.nextFloat()),
+			random.nextBoolean(),
+			Math.abs(random.nextFloat()),
+			random.nextBoolean(),
+			random.nextBoolean(),
 			random.nextBoolean()
 		);
 
@@ -57,7 +65,7 @@ public class SubtaskExecutionAttemptDetailsInfoTest extends RestResponseMarshall
 			Math.abs(random.nextLong()),
 			Math.abs(random.nextLong()),
 			Math.abs(random.nextLong()),
-			ioMetricsInfo,
+			subTaskIOMetricsInfo,
 			"taskmanagerId"
 		);
 	}

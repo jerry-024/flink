@@ -1211,7 +1211,7 @@ Using 'curl' you can upload a jar via 'curl -X POST -H "Expect:" -F "jarfile=@pa
           },
           "metrics" : {
             "type" : "object",
-            "id" : "urn:jsonschema:org:apache:flink:runtime:rest:messages:job:metrics:IOMetricsInfo",
+            "id" : "urn:jsonschema:org:apache:flink:runtime:rest:messages:job:metrics:JobVertexIOMetricsInfo",
             "properties" : {
               "read-bytes" : {
                 "type" : "integer"
@@ -1235,6 +1235,30 @@ Using 'curl' you can upload a jar via 'curl -X POST -H "Expect:" -F "jarfile=@pa
                 "type" : "integer"
               },
               "write-records-complete" : {
+                "type" : "boolean"
+              },
+              "input-exclusive-buffers-usage-avg" : {
+                "type" : "number"
+              },
+              "input-exclusive-buffers-usage-avg-complete" : {
+                "type" : "boolean"
+              },
+              "input-floating-buffers-usage-avg" : {
+                "type" : "number"
+              },
+              "input-floating-buffers-usage-avg-complete" : {
+                "type" : "boolean"
+              },
+              "out-pool-usage-avg" : {
+                "type" : "number"
+              },
+              "out-pool-usage-avg-complete" : {
+                "type" : "boolean"
+              },
+              "is-backpressed" : {
+                "type" : "boolean"
+              },
+              "is-backpressed-complete" : {
                 "type" : "boolean"
               }
             }
@@ -2801,7 +2825,7 @@ Using 'curl' you can upload a jar via 'curl -X POST -H "Expect:" -F "jarfile=@pa
           },
           "metrics" : {
             "type" : "object",
-            "id" : "urn:jsonschema:org:apache:flink:runtime:rest:messages:job:metrics:IOMetricsInfo",
+            "id" : "urn:jsonschema:org:apache:flink:runtime:rest:messages:job:metrics:SubTaskIOMetricsInfo",
             "properties" : {
               "read-bytes" : {
                 "type" : "integer"
@@ -2825,6 +2849,30 @@ Using 'curl' you can upload a jar via 'curl -X POST -H "Expect:" -F "jarfile=@pa
                 "type" : "integer"
               },
               "write-records-complete" : {
+                "type" : "boolean"
+              },
+              "input-exclusive-buffers-usage" : {
+                "type" : "number"
+              },
+              "input-exclusive-buffers-usage-complete" : {
+                "type" : "boolean"
+              },
+              "input-floating-buffers-usage" : {
+                "type" : "number"
+              },
+              "input-floating-buffers-usage-complete" : {
+                "type" : "boolean"
+              },
+              "out-pool-usage" : {
+                "type" : "number"
+              },
+              "out-pool-usage-complete" : {
+                "type" : "boolean"
+              },
+              "is-backpressed" : {
+                "type" : "boolean"
+              },
+              "is-backpressed-complete" : {
                 "type" : "boolean"
               }
             }
@@ -3284,7 +3332,7 @@ Using 'curl' you can upload a jar via 'curl -X POST -H "Expect:" -F "jarfile=@pa
     },
     "metrics" : {
       "type" : "object",
-      "id" : "urn:jsonschema:org:apache:flink:runtime:rest:messages:job:metrics:IOMetricsInfo",
+      "id" : "urn:jsonschema:org:apache:flink:runtime:rest:messages:job:metrics:SubTaskIOMetricsInfo",
       "properties" : {
         "read-bytes" : {
           "type" : "integer"
@@ -3308,6 +3356,30 @@ Using 'curl' you can upload a jar via 'curl -X POST -H "Expect:" -F "jarfile=@pa
           "type" : "integer"
         },
         "write-records-complete" : {
+          "type" : "boolean"
+        },
+        "input-exclusive-buffers-usage" : {
+          "type" : "number"
+        },
+        "input-exclusive-buffers-usage-complete" : {
+          "type" : "boolean"
+        },
+        "input-floating-buffers-usage" : {
+          "type" : "number"
+        },
+        "input-floating-buffers-usage-complete" : {
+          "type" : "boolean"
+        },
+        "out-pool-usage" : {
+          "type" : "number"
+        },
+        "out-pool-usage-complete" : {
+          "type" : "boolean"
+        },
+        "is-backpressed" : {
+          "type" : "boolean"
+        },
+        "is-backpressed-complete" : {
           "type" : "boolean"
         }
       }
@@ -3396,7 +3468,7 @@ Using 'curl' you can upload a jar via 'curl -X POST -H "Expect:" -F "jarfile=@pa
     },
     "metrics" : {
       "type" : "object",
-      "id" : "urn:jsonschema:org:apache:flink:runtime:rest:messages:job:metrics:IOMetricsInfo",
+      "id" : "urn:jsonschema:org:apache:flink:runtime:rest:messages:job:metrics:SubTaskIOMetricsInfo",
       "properties" : {
         "read-bytes" : {
           "type" : "integer"
@@ -3420,6 +3492,30 @@ Using 'curl' you can upload a jar via 'curl -X POST -H "Expect:" -F "jarfile=@pa
           "type" : "integer"
         },
         "write-records-complete" : {
+          "type" : "boolean"
+        },
+        "input-exclusive-buffers-usage" : {
+          "type" : "number"
+        },
+        "input-exclusive-buffers-usage-complete" : {
+          "type" : "boolean"
+        },
+        "input-floating-buffers-usage" : {
+          "type" : "number"
+        },
+        "input-floating-buffers-usage-complete" : {
+          "type" : "boolean"
+        },
+        "out-pool-usage" : {
+          "type" : "number"
+        },
+        "out-pool-usage-complete" : {
+          "type" : "boolean"
+        },
+        "is-backpressed" : {
+          "type" : "boolean"
+        },
+        "is-backpressed-complete" : {
           "type" : "boolean"
         }
       }
@@ -3768,6 +3864,12 @@ Using 'curl' you can upload a jar via 'curl -X POST -H "Expect:" -F "jarfile=@pa
                 "type" : "integer"
               },
               "write-records-complete" : {
+                "type" : "boolean"
+              },
+              "is-backpressed" : {
+                "type" : "boolean"
+              },
+              "is-backpressed-complete" : {
                 "type" : "boolean"
               }
             }

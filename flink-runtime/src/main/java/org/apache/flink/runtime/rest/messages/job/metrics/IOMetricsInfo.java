@@ -19,6 +19,7 @@
 package org.apache.flink.runtime.rest.messages.job.metrics;
 
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonCreator;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
@@ -26,23 +27,27 @@ import java.util.Objects;
 /**
  * IO metrics information.
  */
-public final class IOMetricsInfo {
+public class IOMetricsInfo {
 
-	private static final String FIELD_NAME_BYTES_READ = "read-bytes";
+	protected static final String FIELD_NAME_BYTES_READ = "read-bytes";
 
-	private static final String FIELD_NAME_BYTES_READ_COMPLETE = "read-bytes-complete";
+	protected static final String FIELD_NAME_BYTES_READ_COMPLETE = "read-bytes-complete";
 
-	private static final String FIELD_NAME_BYTES_WRITTEN = "write-bytes";
+	protected static final String FIELD_NAME_BYTES_WRITTEN = "write-bytes";
 
-	private static final String FIELD_NAME_BYTES_WRITTEN_COMPLETE = "write-bytes-complete";
+	protected static final String FIELD_NAME_BYTES_WRITTEN_COMPLETE = "write-bytes-complete";
 
-	private static final String FIELD_NAME_RECORDS_READ = "read-records";
+	protected static final String FIELD_NAME_RECORDS_READ = "read-records";
 
-	private static final String FIELD_NAME_RECORDS_READ_COMPLETE = "read-records-complete";
+	protected static final String FIELD_NAME_RECORDS_READ_COMPLETE = "read-records-complete";
 
-	private static final String FIELD_NAME_RECORDS_WRITTEN = "write-records";
+	protected static final String FIELD_NAME_RECORDS_WRITTEN = "write-records";
 
-	private static final String FIELD_NAME_RECORDS_WRITTEN_COMPLETE = "write-records-complete";
+	protected static final String FIELD_NAME_RECORDS_WRITTEN_COMPLETE = "write-records-complete";
+
+	protected static final String FIELD_NAME_IS_BACKPRESSED = "is-backpressed";
+
+	protected static final String FIELD_NAME_IS_BACKPRESSED_COMPLETE = "is-backpressed-complete";
 
 	@JsonProperty(FIELD_NAME_BYTES_READ)
 	private final long bytesRead;
@@ -68,6 +73,12 @@ public final class IOMetricsInfo {
 	@JsonProperty(FIELD_NAME_RECORDS_WRITTEN_COMPLETE)
 	private final boolean recordsWrittenComplete;
 
+	@JsonProperty(FIELD_NAME_IS_BACKPRESSED)
+	private final boolean isBackPressured;
+
+	@JsonProperty(FIELD_NAME_IS_BACKPRESSED_COMPLETE)
+	private final boolean isBackPressuredComplete;
+
 	@JsonCreator
 	public IOMetricsInfo(
 			@JsonProperty(FIELD_NAME_BYTES_READ) long bytesRead,
@@ -77,7 +88,9 @@ public final class IOMetricsInfo {
 			@JsonProperty(FIELD_NAME_RECORDS_READ) long recordsRead,
 			@JsonProperty(FIELD_NAME_RECORDS_READ_COMPLETE) boolean recordsReadComplete,
 			@JsonProperty(FIELD_NAME_RECORDS_WRITTEN) long recordsWritten,
-			@JsonProperty(FIELD_NAME_RECORDS_WRITTEN_COMPLETE) boolean recordsWrittenComplete) {
+			@JsonProperty(FIELD_NAME_RECORDS_WRITTEN_COMPLETE) boolean recordsWrittenComplete,
+			@JsonProperty(FIELD_NAME_IS_BACKPRESSED) boolean isBackPressured,
+			@JsonProperty(FIELD_NAME_IS_BACKPRESSED_COMPLETE) boolean isBackPressuredComplete) {
 		this.bytesRead = bytesRead;
 		this.bytesReadComplete = bytesReadComplete;
 		this.bytesWritten = bytesWritten;
@@ -86,38 +99,58 @@ public final class IOMetricsInfo {
 		this.recordsReadComplete = recordsReadComplete;
 		this.recordsWritten = recordsWritten;
 		this.recordsWrittenComplete = recordsWrittenComplete;
+		this.isBackPressured = isBackPressured;
+		this.isBackPressuredComplete = isBackPressuredComplete;
 	}
 
+	@JsonIgnore
 	public long getBytesRead() {
 		return bytesRead;
 	}
 
+	@JsonIgnore
 	public boolean isBytesReadComplete() {
 		return bytesReadComplete;
 	}
 
+	@JsonIgnore
 	public long getBytesWritten() {
 		return bytesWritten;
 	}
 
+	@JsonIgnore
 	public boolean isBytesWrittenComplete() {
 		return bytesWrittenComplete;
 	}
 
+	@JsonIgnore
 	public long getRecordsRead() {
 		return recordsRead;
 	}
 
+	@JsonIgnore
 	public boolean isRecordsReadComplete() {
 		return recordsReadComplete;
 	}
 
+	@JsonIgnore
 	public long getRecordsWritten() {
 		return recordsWritten;
 	}
 
+	@JsonIgnore
 	public boolean isRecordsWrittenComplete() {
 		return recordsWrittenComplete;
+	}
+
+	@JsonIgnore
+	public boolean isBackPressured() {
+		return isBackPressured;
+	}
+
+	@JsonIgnore
+	public boolean isBackPressuredComplete() {
+		return isBackPressuredComplete;
 	}
 
 	@Override
@@ -136,11 +169,14 @@ public final class IOMetricsInfo {
 			recordsRead == that.recordsRead &&
 			recordsReadComplete == that.recordsReadComplete &&
 			recordsWritten == that.recordsWritten &&
-			recordsWrittenComplete == that.recordsWrittenComplete;
+			recordsWrittenComplete == that.recordsWrittenComplete &&
+			isBackPressured == that.isBackPressured &&
+			isBackPressuredComplete == that.isBackPressuredComplete;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(bytesRead, bytesReadComplete, bytesWritten, bytesWrittenComplete, recordsRead, recordsReadComplete, recordsWritten, recordsWrittenComplete);
+		return Objects.hash(bytesRead, bytesReadComplete, bytesWritten, bytesWrittenComplete, recordsRead,
+			recordsReadComplete, recordsWritten, recordsWrittenComplete, isBackPressured, isBackPressuredComplete);
 	}
 }
